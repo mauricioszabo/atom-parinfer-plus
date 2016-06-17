@@ -2,6 +2,7 @@ par = require 'parinfer'
 
 module.exports = class Parinfer
   parinferEditors: new Map()
+  constructor: (@subscriptions) ->
 
   toggleMode: (editor) ->
     modes = @parinferEditors.get(editor)
@@ -42,6 +43,7 @@ module.exports = class Parinfer
       editor.setSelectedBufferRanges(oldRanges)
 
     @parinferEditors.set(editor, [disposable, 'indent'])
+    @subscriptions.add(disposable)
 
   triggerFirstChange: (editor) ->
     {success, text, changedLines} = par.parenMode(editor.getText())
