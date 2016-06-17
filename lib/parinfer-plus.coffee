@@ -6,10 +6,10 @@ module.exports =
     @subscriptions = new CompositeDisposable()
     @parinfer = new Parinfer()
 
-    @subscriptions.add atom.commands.add('atom-workspace', 'parinfer-plus:toggle': =>
+    @subscriptions.add atom.commands.add('atom-text-editor', 'parinfer-plus:toggle': =>
       @parinfer.toggle(atom.workspace.getActiveTextEditor()))
 
-    @subscriptions.add atom.commands.add('atom-workspace', 'parinfer-plus:toggle-mode': =>
+    @subscriptions.add atom.commands.add('atom-text-editor', 'parinfer-plus:toggle-mode': =>
       @parinfer.toggleMode(atom.workspace.getActiveTextEditor()))
 
   deactivate: ->

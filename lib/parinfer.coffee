@@ -81,9 +81,12 @@ module.exports = class Parinfer
     else
       par.parenMode(oldText, opts)
     console.log "Parinfer result", parResult
-    {text, success} = parResult
+    {text, success, cursorX} = parResult
     @parinferText = text
     if success && oldText != @parinferText
+      if mode == 'paren'
+        cursorRange.start.column = cursorX
+        cursorRange.end.column = cursorX
       buffer = editor.getBuffer()
       buffer.setTextInRange(buffer.getRange(), @parinferText, undo: 'skip')
 
