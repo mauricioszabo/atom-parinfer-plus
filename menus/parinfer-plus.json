@@ -1,0 +1,26 @@
+{
+  "context-menu": {
+    "atom-text-editor": [
+      {
+        "label": "Toggle parinfer-plus",
+        "command": "parinfer-plus:toggle"
+      }
+    ]
+  },
+  "menu": [
+    {
+      "label": "Packages",
+      "submenu": [
+        {
+          "label": "parinfer-plus",
+          "submenu": [
+            {
+              "label": "Toggle",
+              "command": "parinfer-plus:toggle"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

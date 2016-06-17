@@ -1,0 +1,22 @@
+{
+  "name": "parinfer-plus",
+  "main": "./lib/parinfer-plus",
+  "version": "0.0.0",
+  "description": "Another parinfer for atom",
+  "keywords": [],
+  "repository": "https://github.com/atom/parinfer-plus",
+  "license": "MIT",
+  "engines": {
+    "atom": ">=1.0.0 <2.0.0"
+  },
+  "dependencies": {
+    "parinfer": "^1.8.1"
+  },
+  "consumedServices": {
+    "status-bar": {
+      "versions": {
+        "^1.0.0": "consumeStatusBar"
+      }
+    }
+  }
+}
