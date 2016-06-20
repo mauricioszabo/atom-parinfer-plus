@@ -13,7 +13,7 @@ module.exports =
       @parinfer.toggleMode(atom.workspace.getActiveTextEditor()))
 
     @subscriptions.add atom.workspace.observeActivePaneItem (item) =>
-      @subscriptions.updateStatusBar(item) if item instanceof TextEditor
+      @parinfer.updateStatusBar(item) if item instanceof TextEditor
 
   deactivate: ->
     @subscriptions.dispose();

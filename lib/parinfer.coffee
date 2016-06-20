@@ -73,8 +73,7 @@ module.exports = class Parinfer
     {oldExtent, newExtent} = change
     opts = { cursorLine: cursorRange.end.row, cursorX: cursorRange.end.column }
 
-    if mode == 'paren'
-      opts.cursorDx = newExtent.column - oldExtent.column
+    opts.cursorDx = @calculateDx(change) if mode == 'paren'
 
     oldText = editor.getText()
     console.log "Parinfer", opts, change
@@ -91,6 +90,15 @@ module.exports = class Parinfer
         cursorRange.end.column = cursorX
       buffer = editor.getBuffer()
       buffer.setTextInRange(buffer.getRange(), @parinferText, undo: 'skip')
+
+  calculateDx: (change) ->
+    {oldExtent, newExtent, start} = change
+    if oldExtent.row == newExtent.row
+      newExtent.column - oldExtent.column
+    else if oldExtent.row < newExtent.row # Added a line
+      newExtent.column - start.column
+    else # Removed a line
+      start.column - oldExtent.column
 
   setTitleBarItem: (item) ->
     @item = item
