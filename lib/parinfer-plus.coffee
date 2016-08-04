@@ -15,8 +15,13 @@ module.exports =
     @subscriptions.add atom.workspace.observeActivePaneItem (item) =>
       @parinfer.updateStatusBar(item) if item instanceof TextEditor
 
+    @subscriptions.add atom.workspace.observeTextEditors (editor) =>
+      return unless editor.getGrammar().name.match('Clojure')
+      {success, text, changedLines} = @parinfer.parenMode(editor)
+      @parinfer.toggle(editor) if success && changedLines.length == 0
+
   deactivate: ->
-    @subscriptions.dispose();
+    @subscriptions.dispose()
     @statusBarTile?.destroy()
     @statusBarTile = null
 

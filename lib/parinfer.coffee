@@ -15,7 +15,6 @@ module.exports = class Parinfer
     @parinferEditors.set(editor, [disposable, newMode])
     @updateStatusBar(editor)
 
-
   toggle: (editor) ->
     modes = @parinferEditors.get(editor)
     if modes
@@ -46,7 +45,7 @@ module.exports = class Parinfer
     @subscriptions.add(disposable)
 
   triggerFirstChange: (editor) ->
-    {success, text, changedLines} = par.parenMode(editor.getText())
+    {success, text, changedLines} = @parenMode(editor)
     if success
       if changedLines.length == 0
         return true
@@ -57,7 +56,9 @@ module.exports = class Parinfer
                             Continue?"
           buttons:
             Yes: =>
+              oldRanges = editor.getSelectedBufferRanges()
               editor.setText(text)
+              editor.setSelectedBufferRanges(oldRanges)
               true
             No: => false
     else
@@ -67,21 +68,20 @@ module.exports = class Parinfer
         buttons: ["Ok, Sorry..."]
       return false
 
+  parenMode: (editor) ->
+    par.parenMode(editor.getText())
 
   computeChange: (editor, change, cursorRange, mode) ->
-    console.log("Making change", change, mode)
     {oldExtent, newExtent} = change
     opts = { cursorLine: cursorRange.end.row, cursorX: cursorRange.end.column }
 
     opts.cursorDx = @calculateDx(change) if mode == 'paren'
 
     oldText = editor.getText()
-    console.log "Parinfer", opts, change
     parResult = if mode == 'indent'
       par.indentMode(oldText, opts)
     else
       par.parenMode(oldText, opts)
-    console.log "Parinfer result", parResult
     {text, success, cursorX} = parResult
     @parinferText = text
     if success && oldText != @parinferText
