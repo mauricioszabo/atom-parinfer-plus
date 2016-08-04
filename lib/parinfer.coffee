@@ -5,21 +5,21 @@ module.exports = class Parinfer
   constructor: (@subscriptions) ->
 
   toggleMode: (editor) ->
-    modes = @parinferEditors.get(editor)
+    modes = @parinferEditors.get(editor.getBuffer().id)
     return unless modes
     [disposable, mode] = modes
     newMode = if mode == 'indent'
       'paren'
     else
       'indent'
-    @parinferEditors.set(editor, [disposable, newMode])
+    @parinferEditors.set(editor.getBuffer().id, [disposable, newMode])
     @updateStatusBar(editor)
 
   toggle: (editor) ->
-    modes = @parinferEditors.get(editor)
+    modes = @parinferEditors.get(editor.getBuffer().id)
     if modes
       modes[0].dispose()
-      @parinferEditors.delete(editor)
+      @parinferEditors.delete(editor.getBuffer().id)
     else
       @startParinferFor(editor)
     @updateStatusBar(editor)
@@ -34,14 +34,14 @@ module.exports = class Parinfer
       # Do parinfer's magic
       console.log(changes)
       return if !changes[0] || @parinferText == changes[0].newText
-      modes = @parinferEditors.get(editor)
+      modes = @parinferEditors.get(editor.getBuffer().id)
       return if !modes
 
       oldRanges = editor.getSelectedBufferRanges()
       @computeChange(editor, changes[0], oldRanges[0], modes[1])
       editor.setSelectedBufferRanges(oldRanges)
 
-    @parinferEditors.set(editor, [disposable, 'indent'])
+    @parinferEditors.set(editor.getBuffer().id, [disposable, 'indent'])
     @subscriptions.add(disposable)
 
   triggerFirstChange: (editor) ->
@@ -106,7 +106,7 @@ module.exports = class Parinfer
 
   updateStatusBar: (editor) ->
     return unless @item
-    modes = @parinferEditors.get(editor)
+    modes = @parinferEditors.get(editor.getBuffer().id)
     if modes
       @item.innerHTML = "Parinfer: #{modes[1]} mode"
     else
