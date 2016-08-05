@@ -4,6 +4,15 @@ module.exports = class Parinfer
   parinferEditors: new Map()
   constructor: (@subscriptions) ->
 
+  toggle: (editor) ->
+    modes = @parinferEditors.get(editor.getBuffer().id)
+    if modes
+      modes[0].dispose()
+      @parinferEditors.delete(editor.getBuffer().id)
+    else
+      @startParinferFor(editor)
+    @updateStatusBar(editor)
+
   toggleMode: (editor) ->
     modes = @parinferEditors.get(editor.getBuffer().id)
     return unless modes
@@ -15,15 +24,6 @@ module.exports = class Parinfer
     @parinferEditors.set(editor.getBuffer().id, [disposable, newMode])
     @updateStatusBar(editor)
 
-  toggle: (editor) ->
-    modes = @parinferEditors.get(editor.getBuffer().id)
-    if modes
-      modes[0].dispose()
-      @parinferEditors.delete(editor.getBuffer().id)
-    else
-      @startParinferFor(editor)
-    @updateStatusBar(editor)
-
   startParinferFor: (editor) ->
     # Starts on paren mode, then changes to indent mode
     return unless @triggerFirstChange(editor)
@@ -32,7 +32,6 @@ module.exports = class Parinfer
     @parinferText = null # We can't trigger "CHANGE" multiple times...
     disposable = editor.onDidStopChanging ({changes}) =>
       # Do parinfer's magic
-      console.log(changes)
       return if !changes[0] || @parinferText == changes[0].newText
       modes = @parinferEditors.get(editor.getBuffer().id)
       return if !modes
@@ -105,7 +104,7 @@ module.exports = class Parinfer
     @updateStatusBar(atom.workspace.getActiveTextEditor())
 
   updateStatusBar: (editor) ->
-    return unless @item
+    return unless @item && editor
     modes = @parinferEditors.get(editor.getBuffer().id)
     if modes
       @item.innerHTML = "Parinfer: #{modes[1]} mode"

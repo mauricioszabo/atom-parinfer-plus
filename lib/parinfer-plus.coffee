@@ -18,7 +18,9 @@ module.exports =
     @subscriptions.add atom.workspace.observeTextEditors (editor) =>
       return unless editor.getGrammar().name.match('Clojure')
       {success, text, changedLines} = @parinfer.parenMode(editor)
-      @parinfer.toggle(editor) if success && changedLines.length == 0
+      if success && changedLines.length == 0
+        @parinfer.toggle(editor)
+        @parinfer.updateStatusBar(editor)
 
   deactivate: ->
     @subscriptions.dispose()
