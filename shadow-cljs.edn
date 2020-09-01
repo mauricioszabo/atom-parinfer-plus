@@ -1,0 +1,12 @@
+;; shadow-cljs configuration
+{:source-paths ["src"]
+
+ :dependencies []
+
+ :builds {:package {:target :node-library
+                    :output-to "lib/index.js"
+                    :exports {:config parinfer-plus.core/main
+                              :status-bar parinfer-plus.status-bar/activate}}}}
+                    ; :js-options {:js-provider :shadow
+                    ;              :keep-native-requires true
+                    ;              :keep-as-require #{"atom"}}}}}
