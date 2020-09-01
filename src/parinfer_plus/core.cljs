@@ -26,7 +26,6 @@
                                    :prevCursorX (.. old-range -end -column)})
           new-text (.-text res)]
 
-      (def new-range new-range)
       (when (.-success res)
         (reset! can-change? false)
         (when-not (= new-text new-code)
