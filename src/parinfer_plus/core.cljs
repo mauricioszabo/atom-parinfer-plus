@@ -7,6 +7,7 @@
 (def config #js {})
 
 (let [wrapper (js/require "./wrapper")]
+  (def wasm-p (.-wasm_p wrapper))
   (def indent-mode (.-indentMode wrapper))
   (def paren-mode (.-parenMode wrapper))
   (def smart-mode (.-smartMode wrapper)))
@@ -105,16 +106,18 @@
    (. editor (onDidDestroy #(swap! aux/state update :editors dissoc (.-id editor))))))
 
 (defn main []
-  (aux/subscribe! (.. js/atom -workspace (observeTextEditors observe-editor)))
-  (aux/subscribe! (.. js/atom -workspace (observeActiveTextEditor bar/update-editor!)))
+  (. wasm-p then
+    #(do
+      (aux/subscribe! (.. js/atom -workspace (observeTextEditors observe-editor)))
+      (aux/subscribe! (.. js/atom -workspace (observeActiveTextEditor bar/update-editor!)))
 
-  (aux/subscribe! (.. js/atom
-                      -commands
-                      (add "atom-text-editor" "parinfer-plus:toggle" toggle-parinfer!)))
+      (aux/subscribe! (.. js/atom
+                          -commands
+                          (add "atom-text-editor" "parinfer-plus:toggle" toggle-parinfer!)))
 
-  (aux/subscribe! (.. js/atom
-                      -commands
-                      (add "atom-text-editor" "parinfer-plus:toggle-mode" toggle-mode!))))
+      (aux/subscribe! (.. js/atom
+                          -commands
+                          (add "atom-text-editor" "parinfer-plus:toggle-mode" toggle-mode!))))))
 
 (defn ^:dev/after-load after-load []
   (.. js/atom -notifications (addSuccess "Reloaded Parinfer-Plus"))
