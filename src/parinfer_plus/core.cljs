@@ -22,16 +22,21 @@
                          (doto (.setTextInRange new-range
                                                 (.-oldText changes)))
                          .getText)
+            params #js {:prevText old-code
+                        :cursorLine (.. new-range -end -row)
+                        :prevCursorLine (.. old-range -end -row)
+                        :cursorX (.. new-range -end -column)
+                        :prevCursorX (.. old-range -end -column)}
+            smart-mode-res (delay (paren-mode new-code params))
+            pasting-complex-code? (and (re-find #"\n.*\n" (.-newText changes))
+                                       (.-success ^js @smart-mode-res))
             code (case (:mode @aux/state)
                    :smart smart-mode
                    :paren paren-mode
                    :ident indent-mode)
-            res ^js (code new-code
-                          #js {:prevText old-code
-                               :cursorLine (.. new-range -end -row)
-                               :prevCursorLine (.. old-range -end -row)
-                               :cursorX (.. new-range -end -column)
-                               :prevCursorX (.. old-range -end -column)})
+            res ^js (if pasting-complex-code?
+                      @smart-mode-res
+                      (code new-code params))
             new-text (.-text res)]
 
         (when (.-success ^js res)
