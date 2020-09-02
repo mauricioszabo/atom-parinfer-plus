@@ -10,11 +10,9 @@
 (defn subscribe! [disposable]
   (.add @disposables disposable))
 
-    ; @subscriptions.add atom.commands.add('atom-text-editor', 'parinfer-plus:toggle': =>)
-    ;   @parinfer.toggle(atom.workspace.getActiveTextEditor())
-    ;
-    ; @subscriptions.add atom.commands.add('atom-text-editor', 'parinfer-plus:toggle-mode': =>)
-    ;   @parinfer.toggleMode(atom.workspace.getActiveTextEditor())
-    ;
-    ; @subscriptions.add atom.workspace.observeActivePaneItem (item) =>
-    ;   @parinfer.updateStatusBar(item) if item instanceof TextEditor))
+(defonce state (atom {:mode :smart
+                      :use-smart? true
+                      :editors {}}))
+
+(defn state-for [^js editor]
+  (get-in @state [:editors (.-id editor)]))
