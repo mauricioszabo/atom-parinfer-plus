@@ -81,10 +81,19 @@
                                        (if (-> @aux/state :use-smart?) :smart :indent)))
       (bar/update-editor! editor))))
 
+(defn- should-be-active? [^js editor]
+  (let [grammar (.. editor getGrammar -id)
+        editor-txt (delay (.getText editor))
+        parinfer-result (delay (paren-mode @editor-txt {}))
+        parinfer-txt (delay (.-text @parinfer-result))]
+    (and (grammars (.. editor getGrammar -id))
+         (.-success ^js @parinfer-result)
+         (= @editor-txt @parinfer-txt))))
+
 (defn- observe-editor [^js editor]
   (swap! aux/state assoc-in [:editors (.-id editor)]
          {:can-change? true
-          :active? (grammars (.. editor getGrammar -id))})
+          :active? (should-be-active? editor)})
   (aux/subscribe! (.. editor getBuffer
                       (onDidChange #(run-parinfer! editor %))))
   (aux/subscribe!
