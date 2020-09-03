@@ -13,9 +13,8 @@ jobs:
           when: always
       - persist_to_workspace:
           root: '.'
-          path: 'lib/index.js'
-          # paths:
-          #   - target
+          paths:
+            - lib
           #   - node_modules
       # - store_test_results:
       #     path: ~/junit
