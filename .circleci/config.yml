@@ -13,7 +13,7 @@ jobs:
           when: always
       - persist_to_workspace:
           root: '.'
-          path: '.'
+          path: 'lib/index.js'
           # paths:
           #   - target
           #   - node_modules
@@ -25,6 +25,7 @@ jobs:
   publish:
     <<: *defaults
     steps:
+      - checkout
       - attach_workspace:
           at: '.'
       - run: ./scripts/ci-prepare-release
