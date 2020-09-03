@@ -2,6 +2,7 @@
 - Config to toggle smart mode
 - Config to enable/disable "smart paste"
 - Fix some problems with multicursor
+- Add tests
 
 ## 0.0.1 - First Release
 - Added parinfer-rust version
