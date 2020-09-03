@@ -1,3 +1,9 @@
-## 0.1.0 - First Release
-* Every feature added
-* Every bug fixed
+# Semi-organized next versions
+- Config to toggle smart mode
+- Config to enable/disable "smart paste"
+- Fix some problems with multicursor
+- Add tests
+
+## 0.0.1 - First Release
+- Added parinfer-rust version
+- POC for "paste code"

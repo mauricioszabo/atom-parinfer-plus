@@ -1,0 +1,43 @@
+version: 2.1
+defaults: &defaults
+  machine:
+    image: circleci/classic:edge
+
+jobs:
+  test:
+    <<: *defaults
+    steps:
+      - checkout
+      - run:
+          command: ./scripts/ci
+          when: always
+      - persist_to_workspace:
+          root: '.'
+          paths:
+            - lib
+          #   - node_modules
+      # - store_test_results:
+      #     path: ~/junit
+      # - store_artifacts:
+      #     path: ~/junit
+
+  publish:
+    <<: *defaults
+    steps:
+      - checkout
+      - attach_workspace:
+          at: '.'
+      - run: ./scripts/ci-prepare-release
+
+workflows:
+  version: 2
+  default-workflow:
+    jobs:
+      - test
+
+      - publish:
+          requires:
+            - test
+          filters:
+            branches:
+              only: /^release-v.*/

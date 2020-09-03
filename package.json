@@ -2,9 +2,9 @@
   "name": "parinfer-plus",
   "main": "./lib/index.js",
   "version": "0.0.1",
-  "description": "Another parinfer for atom",
-  "keywords": [],
-  "repository": "https://github.com/atom/parinfer-plus",
+  "description": "Another parinfer for atom, based on parinfer-rust",
+  "keywords": ["clojure", "clojurescript", "parinfer", "wasm"],
+  "repository": "https://github.com/mauricioszabo/atom-parinfer-plus",
   "license": "MIT",
   "engines": {
     "atom": ">=1.0.0 <2.0.0"
