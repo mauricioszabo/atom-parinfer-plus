@@ -13,6 +13,7 @@ jobs:
           when: always
       - persist_to_workspace:
           root: '.'
+          path: '.'
           # paths:
           #   - target
           #   - node_modules
