@@ -2,7 +2,7 @@
   (:require [parinfer-plus.aux :as aux]
             [parinfer-plus.status-bar :as bar]
             [clojure.string :as str]
-            ["atom" :refer [TextBuffer]]))
+            ["atom" :refer [TextBuffer Range]]))
 
 (def config #js {})
 
@@ -35,10 +35,11 @@
                    :smart smart-mode
                    :paren paren-mode
                    :ident indent-mode)
-            res ^js (if pasting-complex-code?
+            res ^js (if false #_pasting-complex-code?
                       @smart-mode-res
                       (code new-code params))
-            new-text (.-text res)]
+            new-text (.-text res)
+            pos-after-change (delay (.getCursorBufferPosition editor))]
 
         (when (.-success ^js res)
           (swap! aux/state assoc-in [:editors (.-id editor) :can-change?] false)
@@ -46,6 +47,46 @@
             (.setText editor (.-text ^js res))
             (.groupLastChanges buffer)
             (.setCursorBufferPosition editor #js [(.-cursorLine ^js res) (.-cursorX ^js res)]))))))
+  (swap! aux/state assoc-in [:editors (.-id editor) :can-change?] true))
+
+(let [a (:foo {}
+              10)])
+
+(defn- run-parinfer-for-range! [^js editor, ^js range, ^js changes]
+  (let [{:keys [can-change? active?]} (aux/state-for editor)]
+    (when (and active? can-change?)
+      (let [buffer ^js (.getBuffer editor)
+            new-range (.-newRange changes)
+            old-range (.-oldRange changes)
+            start (.-start range)
+            new-code (.getTextInRange buffer range)
+            old-code (-> (TextBuffer. #js {:text (.getText buffer)})
+                         (doto (.setTextInRange new-range
+                                                (.-oldText changes)))
+                         (.getTextInRange range))
+            old-line (- (.. old-range -end -row) (.-row start))
+            old-x (.. old-range -end -column)
+            new-line (- (.. new-range -end -row) (.-row start))
+            new-x (.. new-range -end -column)
+            params #js {:prevText old-code
+                        :cursorLine new-line
+                        :prevCursorLine old-line
+                        :cursorX new-x
+                        :prevCursorX old-x}
+            code (case (:mode @aux/state)
+                   :smart smart-mode
+                   :paren paren-mode
+                   :ident indent-mode)
+            res ^js (code new-code params)
+            new-text (.-text res)]
+
+        (when (.-success ^js res)
+          (swap! aux/state assoc-in [:editors (.-id editor) :can-change?] false)
+          (when-not (= new-text new-code)
+            (.setTextInRange buffer range new-text)
+            (.groupLastChanges buffer)
+            (.setCursorBufferPosition editor #js [(+ (.-row start) (.-cursorLine ^js res))
+                                                  (+ (.-column start) (.-cursorX ^js res))]))))))
   (swap! aux/state assoc-in [:editors (.-id editor) :can-change?] true))
 
 (def ^:private grammars #{"source.clojure"
@@ -96,14 +137,52 @@
          (.-success ^js @parinfer-result)
          (= @editor-txt @parinfer-txt))))
 
+(defn- editor-changed [^js editor, ^js evt]
+  (let [buffer (.getBuffer editor)
+        new-range (.-newRange evt)
+        buffer (.getBuffer editor)
+        start-pos (.characterIndexForPosition buffer (.-start new-range))
+        end-pos (.characterIndexForPosition buffer (.-end new-range))
+        ts-root-nodes (some-> (. editor -languageMode) .-tree .-rootNode .-children)
+        ^js root-node (->> ts-root-nodes
+                           (filter (fn [^js node] (<= (.-startIndex node) start-pos end-pos (.-endIndex node))))
+                           first)
+        root-range (when root-node
+                     (new Range (.-startPosition root-node) (.-endPosition root-node)))]
+
+    (if root-range
+      (run-parinfer-for-range! editor root-range evt)
+      (run-parinfer! editor evt))))
+
 (defn- observe-editor [^js editor]
   (swap! aux/state assoc-in [:editors (.-id editor)]
          {:can-change? true
           :active? (should-be-active? editor)})
   (aux/subscribe! (.. editor getBuffer
-                      (onDidChange #(run-parinfer! editor %))))
+                      (onDidChange #(editor-changed editor %))))
   (aux/subscribe!
    (. editor (onDidDestroy #(swap! aux/state update :editors dissoc (.-id editor))))))
+
+(defn- paste [above?]
+  (let [editor (.. js/atom -workspace getActiveTextEditor)
+        clipboard-text (.. js/atom -clipboard read)
+        text (.getText editor)
+        replaced-buffer (reduce (fn [^js buffer ^js selection]
+                                  (doto buffer
+                                        (.setTextInRange (.getBufferRange selection)
+                                                         clipboard-text)))
+                                (TextBuffer. #js {:text text})
+                                (.getSelections editor))
+        params #js {:prevText text
+                    :cursorLine 0
+                    :prevCursorLine 0
+                    :cursorX 0
+                    :prevCursorX 0}
+        res (paren-mode (.getText ^js replaced-buffer) params)]
+    ; (prn :T text)
+    ; (prn :REPLACED (.getText replaced-buffer))
+    (tap> res)
+    (println (.-text res))))
 
 (defn main []
   (. wasm-p then
@@ -111,6 +190,9 @@
       (aux/subscribe! (.. js/atom -workspace (observeTextEditors observe-editor)))
       (aux/subscribe! (.. js/atom -workspace (observeActiveTextEditor bar/update-editor!)))
 
+      (aux/subscribe! (.. js/atom
+                          -commands
+                          (add "atom-text-editor" "parinfer-plus:paste" (fn [] (paste false)))))
       (aux/subscribe! (.. js/atom
                           -commands
                           (add "atom-text-editor" "parinfer-plus:toggle" toggle-parinfer!)))
