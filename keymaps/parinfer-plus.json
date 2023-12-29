@@ -1,14 +1,31 @@
 {
-  ".platform-linux atom-workspace": {
+  ".platform-linux atom-text-editor": {
     "ctrl-(": "parinfer-plus:toggle-mode",
     "ctrl-)": "parinfer-plus:toggle"
   },
-  ".platform-win32 atom-workspace": {
+  ".platform-win32 atom-text-editor": {
     "ctrl-(": "parinfer-plus:toggle-mode",
     "ctrl-)": "parinfer-plus:toggle"
   },
-  ".platform-darwin atom-workspace": {
+  ".platform-darwin atom-text-editor": {
     "cmd-(": "parinfer-plus:toggle-mode",
     "cmd-)": "parinfer-plus:toggle"
+  },
+  ".platform-linux atom-text-editor.parinfer-plus": {
+    "ctrl-v": "parinfer-plus:paste"
+  },
+  ".platform-win32 atom-text-editor.parinfer-plus": {
+    "ctrl-v": "parinfer-plus:paste"
+  },
+  ".platform-darwin atom-text-editor.parinfer-plus": {
+    "cmd-v": "parinfer-plus:paste"
+  },
+  "atom-text-editor.vim-mode-plus.visual-mode.parinfer-plus": {
+    "p": "parinfer-plus:paste",
+    "P": "parinfer-plus:paste"
+  },
+  "atom-text-editor.vim-mode-plus.normal-mode.parinfer-plus": {
+    "p": "parinfer-plus:paste-after",
+    "P": "parinfer-plus:paste"
   }
 }
